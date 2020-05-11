@@ -11,6 +11,7 @@ const app = express();
 
 // CORS
 app.use(cors());
+app.use(express.json({limit: '50mb'}));
 
 app.use(function (req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
@@ -55,7 +56,7 @@ app.post("/register", async (req, res) => {
   const users = await client.db().collection("users").find({ email }).toArray();
 
   if (users.length >= 1) {
-    return res.json({ message: "Email bereits registriert." }).status(400);
+    return res.status(400).json({ message: "Email bereits registriert." });
   }
 
   const { insertedId } = await client
@@ -82,7 +83,6 @@ app.post(
   passport.authenticate("jwt", { session: false }),
   async (req, res) => {
     const { user, body } = req;
-    console.log(user);
     const client = new MongoClient(process.env.MONGO_URI);
 
     await client.connect();
