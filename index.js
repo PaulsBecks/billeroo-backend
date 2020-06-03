@@ -7,11 +7,12 @@ const cors = require("cors");
 const passport = require("passport");
 const jwt = require("jsonwebtoken");
 require("./passport")(passport);
+const sendRegistrationConfirmation = require("./email/sendRegistrationConfirmation");
 const app = express();
 
 // CORS
 app.use(cors());
-app.use(express.json({limit: '50mb'}));
+app.use(express.json({ limit: "50mb" }));
 
 app.use(function (req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
@@ -75,6 +76,10 @@ app.post("/register", async (req, res) => {
     .collection("users")
     .findOne({ _id: insertedId }, { email: 1 });
   const token = jwt.sign(user, process.env.JWT_SECRET);
+
+  //send registration email
+  sendRegistrationConfirmation(user);
+
   return res.json({ user, token });
 });
 
@@ -128,6 +133,13 @@ app.get(
     }
   }
 );
+
+app.get("/test/email", (req, res) => {
+  sendRegistrationConfirmation({
+    email: "test@billeroo.de",
+  });
+  res.end();
+});
 
 // START SERVER
 const port = 8000;
