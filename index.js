@@ -8,6 +8,7 @@ const passport = require("passport");
 const jwt = require("jsonwebtoken");
 require("./passport")(passport);
 const sendRegistrationConfirmation = require("./email/sendRegistrationConfirmation");
+const sendInvoice = require("./email/sendInvoice");
 const app = express();
 
 // CORS
@@ -139,6 +140,21 @@ app.get("/test/email", (req, res) => {
     email: "test@billeroo.de",
   });
   res.end();
+});
+
+app.post("/email/invoice", (req, res) => {
+  let { data, fileName, text = "", to } = req.body;
+  console.log({ text });
+  if (!data || !to) {
+    res.status(400).end();
+    return;
+  }
+
+  if (!fileName) {
+    fileName = "billeroo_rechnung";
+  }
+
+  sendInvoice({ data, to, text, fileName });
 });
 
 // START SERVER
