@@ -135,12 +135,16 @@ app.get(
   }
 );
 
-app.get("/test/email", (req, res) => {
-  sendRegistrationConfirmation({
-    email: "test@billeroo.de",
-  });
-  res.end();
-});
+app.get(
+  "/test/email",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    sendRegistrationConfirmation({
+      email: "test@billeroo.de",
+    });
+    res.end();
+  }
+);
 
 app.post("/email/invoice", (req, res) => {
   let { data, fileName, text = "", to } = req.body;
@@ -155,6 +159,16 @@ app.post("/email/invoice", (req, res) => {
   }
 
   sendInvoice({ data, to, text, fileName });
+});
+
+app.post("/webhook/:hookId", (req, res) => {
+  console.log(req.body);
+  return res.send("Hello world");
+});
+
+app.get("/webhook/:hookId", (req, res) => {
+  console.log(req.body);
+  return res.send("Hello world");
 });
 
 // START SERVER
