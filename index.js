@@ -162,7 +162,8 @@ app.post("/email/invoice", (req, res) => {
 });
 
 app.post("/webhook/:hookId", (req, res) => {
-  console.log(req.body);
+  console.log(Object.keys(req.body));
+  const { billing, shipping, line_items, date_paid } = req.body;
   return res.send("Hello world");
 });
 
