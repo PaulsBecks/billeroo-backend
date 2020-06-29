@@ -6,4 +6,8 @@ describe("Index route", () => {
     const res = await request(app).get("/");
     expect(res.statusCode).toEqual(200);
   });
+
+  afterAll((done) => {
+    app.close();
+  });
 });

@@ -178,8 +178,12 @@ app.get("/", (req, res) => {
 
 // START SERVER
 const port = 8000;
-app.listen(port, () =>
+const server = app.listen(port, () =>
   console.log(`Example app listening at http://localhost:${port}`)
 );
+
+app["close"] = () => {
+  server.close();
+};
 
 module.exports = app;
