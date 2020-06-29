@@ -172,8 +172,14 @@ app.get("/webhook/:hookId", (req, res) => {
   return res.send("Hello world");
 });
 
+app.get("/", (req, res) => {
+  return res.send("Hi there!");
+});
+
 // START SERVER
 const port = 8000;
 app.listen(port, () =>
   console.log(`Example app listening at http://localhost:${port}`)
 );
+
+module.exports = app;

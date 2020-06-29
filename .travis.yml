@@ -1,0 +1,9 @@
+sudo: required
+services:
+  - docker
+
+before_install:
+  - docker build -t paulsbecks/billeroo-backend -f Dockerfile.dev .
+
+script:
+  - docker run paulsbecks/billeroo-backend npm run test -- --coverage
