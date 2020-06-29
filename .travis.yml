@@ -12,7 +12,7 @@ script:
 deploy:
   provider: elasticbeanstalk
   region: "eu-west-1"
-  name: "Billeroo-Backend"
+  app: "Billeroo-Backend"
   env: "Billeroo-Backend-env"
   bucket-name: "elasticbeanstalk-eu-west-1-041072790895"
   bucket-path: "Billeroo-Backend"
