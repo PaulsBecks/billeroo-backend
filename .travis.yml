@@ -7,3 +7,11 @@ before_install:
 
 script:
   - docker run paulsbecks/billeroo-backend npm run test -- --coverage
+
+env:
+  - MONGO_URI=$MONGO_URI
+  - JWT_SECRET=$JWT_SECRET
+  - EMAIL_USER=$EMAIL_USER
+  - EMAIL_PASSWORD=$EMAIL_PASSWORD
+  - SERVICE_EMAIL=$SERVICE_EMAIL
+  - EMAIL_PROVIDER=$EMAIL_PROVIDER
