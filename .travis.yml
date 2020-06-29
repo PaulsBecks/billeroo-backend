@@ -8,3 +8,15 @@ before_install:
 
 script:
   - docker run paulsbecks/billeroo-backend npm run test -- --coverage
+
+deploy:
+  provider: elasticbeanstalk
+  region: "eu-west-1"
+  name: "Billeroo-Backend"
+  env: "Billeroo-Backend-env"
+  bucket-name: "elasticbeanstalk-eu-west-1-041072790895"
+  bucket-path: "Billeroo-Backend"
+  on:
+    branch: master
+  access_key_id: $AWS_ACCESS_KEY
+  secret_access_key: $AWS_SECRET_KEY
