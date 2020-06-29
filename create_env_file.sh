@@ -1,0 +1,6 @@
+echo "MONGO_URI=$MONGO_URI" >> .env
+echo "JWT_SECRET=$JWT_SECRET" >> .env
+echo "EMAIL_USER=$EMAIL_USER" >> .env
+echo "EMAIL_PASSWORD=$EMAIL_PASSWORD" >> .env
+echo "SERVICE_EMAIL=$SERVICE_EMAIL" >> .env
+echo "EMAIL_PROVIDER=$EMAIL_PROVIDER" >> .env
