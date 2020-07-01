@@ -1,20 +1,19 @@
 version: "3"
 services:
-  backend:
-    restart: always
+  proxy:
+    restart: "always"
     build:
-      context: .
-      dockerfile: ./Dockerfile.dev
+      dockerfile: Dockerfile
+      context: "./nginx"
     ports:
-      - "8000:8000"
-    volumes:
-      - /usr/billeroo-backend/node_modules
-      - .:/usr/billeroo-backend
-  test:
+      - 8000:80
+  auth-backend:
+    restart: "always"
     build:
-      context: .
-      dockerfile: ./Dockerfile.dev
-    volumes:
-      - /usr/billeroo-backend/node_modules
-      - .:/usr/billeroo-backend
-    command: ["npm", "run", "test"]
+      dockerfile: Dockerfile
+      context: "./auth-backend"
+  data-backend:
+    restart: "always"
+    build:
+      dockerfile: Dockerfile
+      context: "./data-backend"

@@ -4,20 +4,7 @@ services:
 
 before_install:
   - sh create_env_file.sh
-  - docker build -t paulsbecks/billeroo-backend -f Dockerfile.dev .
+  - docker build -t paulsbecks/billeroo-backend -f auth-backend/Dockerfile.dev .
 
 script:
   - docker run paulsbecks/billeroo-backend npm run test -- --coverage
-
-deploy:
-  provider: elasticbeanstalk
-  region: "eu-west-1"
-  app: "Billeroo-Backend"
-  env: "BillerooBackend-env"
-  bucket_name: "elasticbeanstalk-eu-west-1-041072790895"
-  bucket_path: "Billeroo-Backend"
-  on:
-    branch: master
-  access_key_id: $AWS_ACCESS_KEY
-  secret_access_key:
-    secure: "$AWS_SECRET_KEY"
