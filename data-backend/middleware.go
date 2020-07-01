@@ -3,14 +3,24 @@ package main
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/globalsign/mgo/bson"
 )
 
 func middleware(app *gin.Engine) {
 	app.Use(
+		cors.New(cors.Config{
+			AllowOrigins:     []string{"https://www.billeroo.com", "https://billeroo.com"},
+			AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "PATCH"},
+			AllowHeaders:     []string{"Origin"},
+			ExposeHeaders:    []string{"Content-Length"},
+			AllowCredentials: true,
+			MaxAge:           12 * time.Hour,
+		}),
 		getUserFromToken,
 		parseJSONfromBody,
 	)
