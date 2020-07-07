@@ -1,1 +1,1 @@
-CompileDaemon -command="./golang-test"
+CompileDaemon -command="./data-backend"

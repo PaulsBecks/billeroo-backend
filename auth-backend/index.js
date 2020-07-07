@@ -9,7 +9,20 @@ const jwt = require("jsonwebtoken");
 require("./passport")(passport);
 const sendRegistrationConfirmation = require("./email/sendRegistrationConfirmation");
 const sendInvoice = require("./email/sendInvoice");
+const companySceleton = require("./sceletons/company");
+
 const app = express();
+
+function makeid(length) {
+  var result = "";
+  var characters =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  var charactersLength = characters.length;
+  for (var i = 0; i < length; i++) {
+    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+  }
+  return result;
+}
 
 // CORS
 app.use(cors());
@@ -28,14 +41,6 @@ const { MongoClient } = require("mongodb");
 
 app.use(bodyParser.json());
 
-app.get("/users", async (req, res) => {
-  const client = new MongoClient(process.env.MONGO_URI);
-  await client.connect();
-  const users = await client.db().collection("users").find().toArray();
-  client.close();
-  res.json(users);
-});
-
 app.post(
   "/login",
   passport.authenticate("local", { session: false }),
@@ -46,92 +51,57 @@ app.post(
   }
 );
 
-app.post("/register", async (req, res) => {
-  const { email, password } = req.body;
-  if (!password || !email) {
-    return res.status(400).json({});
-  }
-
-  const _password = await bcrypt.hash(password, 8);
-  const client = new MongoClient(process.env.MONGO_URI);
-  await client.connect();
-  const users = await client.db().collection("users").find({ email }).toArray();
-
-  if (users.length >= 1) {
-    return res.status(400).json({ message: "Email bereits registriert." });
-  }
-
-  const { insertedId } = await client
-    .db()
-    .collection("users")
-    .insertOne({ email, password: _password });
-  client.db().collection("data").insertOne({
-    userId: insertedId,
-    invoices: [],
-    articles: [],
-    customers: [],
-    authors: [],
-  });
-  const user = await client
-    .db()
-    .collection("users")
-    .findOne({ _id: insertedId }, { email: 1 });
-  const token = jwt.sign(user, process.env.JWT_SECRET);
-
-  //send registration email
-  sendRegistrationConfirmation(user);
-
-  return res.json({ user, token });
-});
-
 app.post(
-  "/data",
+  "/register",
   passport.authenticate("jwt", { session: false }),
   async (req, res) => {
-    const { user, body } = req;
-    const client = new MongoClient(process.env.MONGO_URI);
+    const { email, password } = req.body;
+    const { user: _user } = req;
 
-    await client.connect();
-    try {
-      const { value } = await client
-        .db()
-        .collection("data")
-        .findOneAndUpdate({ userId: user._id }, { $set: body });
-
-      const data = await client
-        .db()
-        .collection("data")
-        .findOne({ _id: value._id });
-      client.close();
-      return res.json({ ...data });
-    } catch (err) {
-      console.log(err);
-      client.close();
-      return res.status(500).end();
+    if (!password || !email) {
+      return res.status(400).json({});
     }
-  }
-);
 
-app.get(
-  "/data",
-  passport.authenticate("jwt", { session: false }),
-  async (req, res) => {
-    const { user } = req;
+    const _password = await bcrypt.hash(password, 8);
     const client = new MongoClient(process.env.MONGO_URI);
-
     await client.connect();
-    try {
-      const data = await client
-        .db()
-        .collection("data")
-        .findOne({ userId: user._id });
 
-      client.close();
-      return res.json({ ...data });
-    } catch (err) {
-      console.log(err);
-      return res.status(500).end();
+    //check if user exists already
+    const users = await client
+      .db()
+      .collection("users")
+      .find({ email })
+      .toArray();
+
+    if (users.length >= 1) {
+      return res.status(400).json({ message: "Email bereits registriert." });
     }
+
+    // update dummy user to use correct email and password
+    const { upsertedId } = await client
+      .db()
+      .collection("users")
+      .updateOne(
+        { email: _user.email },
+        { $set: { email, password: _password, placeholder: false } }
+      );
+
+    const user = await client
+      .db()
+      .collection("users")
+      .findOne({ email }, { email: 1, placeholder: true });
+
+    if (!user) {
+      console.log("Unable to retrieve user: ", user);
+      return res.status(500);
+    }
+
+    const token = jwt.sign(user, process.env.JWT_SECRET);
+
+    //send registration email
+    sendRegistrationConfirmation(user);
+
+    return res.json({ user, token });
   }
 );
 
@@ -146,34 +116,67 @@ app.get(
   }
 );
 
-app.post("/email/invoice", (req, res) => {
-  let { data, fileName, text = "", to } = req.body;
-  console.log({ text });
-  if (!data || !to) {
-    res.status(400).end();
-    return;
+app.post(
+  "/email/invoice",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    let { data, fileName, text = "", to } = req.body;
+    console.log({ text });
+    if (!data || !to) {
+      res.status(400).end();
+      return;
+    }
+
+    if (!fileName) {
+      fileName = "billeroo_rechnung";
+    }
+
+    sendInvoice({ data, to, text, fileName });
   }
-
-  if (!fileName) {
-    fileName = "billeroo_rechnung";
-  }
-
-  sendInvoice({ data, to, text, fileName });
-});
-
-app.post("/webhook/:hookId", (req, res) => {
-  console.log(Object.keys(req.body));
-  const { billing, shipping, line_items, date_paid } = req.body;
-  return res.send("Hello world");
-});
-
-app.get("/webhook/:hookId", (req, res) => {
-  console.log(req.body);
-  return res.send("Hello world");
-});
+);
 
 app.get("/", (req, res) => {
   return res.send("Hi there!");
+});
+
+app.get("/users/placeholder", async (req, res) => {
+  const client = new MongoClient(process.env.MONGO_URI);
+  await client.connect();
+
+  let email;
+
+  while (true) {
+    email = makeid(20);
+    const users = await client
+      .db()
+      .collection("users")
+      .find({ email })
+      .toArray();
+    if (users.length < 1) {
+      break;
+    }
+  }
+
+  const password = makeid(20);
+
+  const { insertedId } = await client
+    .db()
+    .collection("users")
+    .insertOne({ email, password, placeholder: true });
+
+  // add company to account
+  client
+    .db()
+    .collection("companies")
+    .insertOne({ ...companySceleton, userId: insertedId });
+
+  const user = await client
+    .db()
+    .collection("users")
+    .findOne({ _id: insertedId }, { email: 1, placeholder: 1 });
+  const token = jwt.sign(user, process.env.JWT_SECRET);
+
+  return res.json({ user, token });
 });
 
 // START SERVER

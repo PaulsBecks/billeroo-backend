@@ -1,4 +1,4 @@
-module example.com/data-backend
+module billeroo.de/data-backend
 
 go 1.14
 
