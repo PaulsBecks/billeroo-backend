@@ -115,7 +115,7 @@ func ReceiveWebhook(database *mongo.Database) func(ctx *gin.Context) {
 
 		if err != nil {
 			fmt.Println(err.Error())
-			ctx.Status(http.StatusBadRequest)
+			ctx.Status(http.StatusOK)
 			return
 		}
 

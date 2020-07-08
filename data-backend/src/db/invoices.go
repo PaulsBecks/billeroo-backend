@@ -6,6 +6,7 @@ import (
 	"github.com/globalsign/mgo/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 // CUSTOMERS
@@ -19,8 +20,11 @@ func FindInvoicesByUserId(d *mongo.Database, userId string) ([]bson.M, error) {
 	if err != nil {
 		return result, err
 	}
+	findOptions := options.Find()
+	findOptions.SetSort(bson.M{"orderDate": -1})
 
 	filter := bson.M{"userId": id}
+
 	cursor, err := invoiceCollection.Find(context.Background(), filter)
 	if err != nil {
 		return result, err
