@@ -121,7 +121,7 @@ func FindOrCreateCustomerByWPcustomerId(database *mongo.Database, uId string, wh
 	shippingPostCodeCity := shipping.Postcode + " " + shipping.City
 
 	customer["shippingAddress"] = fmt.Sprintf("<p>%s • %s  %s %s • %s</p>", shippingName, shippingCompany, shippingAddress1, shippingAddress2, shippingPostCodeCity)
-	customer["ust"] = 7
+	customer["ust"] = 5
 	customer["whCustomerId"] = whCustomerId
 
 	customer, err = CreateCustomer(database, uId, customer)

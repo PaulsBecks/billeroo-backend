@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"billeroo.de/data-backend/src/db"
+	"billeroo.de/data-backend/src/mail"
 	"billeroo.de/data-backend/src/models"
 	"github.com/gin-gonic/gin"
 	"github.com/globalsign/mgo/bson"
@@ -93,13 +94,19 @@ func ReceiveWebhook(database *mongo.Database) func(ctx *gin.Context) {
 
 		if err != nil {
 			fmt.Println(err.Error())
-			ctx.Status(404)
+			ctx.Status(http.StatusNotFound)
 			return
 		}
 
-		fmt.Println(webhook)
-
 		userId := webhook["userId"].(primitive.ObjectID).Hex()
+
+		user, err := db.FindUserById(database, userId)
+
+		if err != nil {
+			fmt.Println(err.Error())
+			ctx.Status(http.StatusInternalServerError)
+			return
+		}
 
 		company, err := db.FindCompanyByUserId(database, userId)
 
@@ -168,6 +175,10 @@ func ReceiveWebhook(database *mongo.Database) func(ctx *gin.Context) {
 			ctx.Status(http.StatusInternalServerError)
 			return
 		}
+
+		invoiceId := invoice["_id"].(primitive.ObjectID).Hex()
+
+		mail.NewInvoiceEmail(user.Email, invoiceId)
 
 		ctx.JSON(http.StatusCreated, gin.H{"body": invoice})
 		return
