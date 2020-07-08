@@ -25,7 +25,7 @@ func FindInvoicesByUserId(d *mongo.Database, userId string) ([]bson.M, error) {
 
 	filter := bson.M{"userId": id}
 
-	cursor, err := invoiceCollection.Find(context.Background(), filter)
+	cursor, err := invoiceCollection.Find(context.Background(), filter, findOptions)
 	if err != nil {
 		return result, err
 	}
