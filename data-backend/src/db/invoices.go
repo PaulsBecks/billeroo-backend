@@ -21,7 +21,7 @@ func FindInvoicesByUserId(d *mongo.Database, userId string) ([]bson.M, error) {
 		return result, err
 	}
 	findOptions := options.Find()
-	findOptions.SetSort(bson.M{"invoiceDate": -1})
+	findOptions.SetSort(bson.M{"_id": -1})
 
 	filter := bson.M{"userId": id}
 
