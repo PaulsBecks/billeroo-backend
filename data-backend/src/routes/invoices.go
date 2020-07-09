@@ -3,6 +3,8 @@ package routes
 import (
 	"fmt"
 	"log"
+	"net/http"
+	"strconv"
 
 	"billeroo.de/data-backend/src/db"
 	"github.com/gin-gonic/gin"
@@ -60,7 +62,16 @@ func GetInvoices(database *mongo.Database) func(ctx *gin.Context) {
 			return
 		}
 
-		invoices, err := db.FindInvoicesByUserId(database, requestUser.Id)
+		limitStr := ctx.DefaultQuery("limit", "-1")
+		limit, err := strconv.Atoi(limitStr)
+
+		if err != nil {
+			log.Println("Limit set but not an integer")
+			ctx.Status(http.StatusBadRequest)
+			return
+		}
+
+		invoices, err := db.FindInvoicesByUserId(database, requestUser.Id, int64(limit))
 		fmt.Println(requestUser)
 		if err != nil {
 			log.Fatal(err)

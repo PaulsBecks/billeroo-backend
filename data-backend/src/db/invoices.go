@@ -11,7 +11,7 @@ import (
 
 // CUSTOMERS
 
-func FindInvoicesByUserId(d *mongo.Database, userId string) ([]bson.M, error) {
+func FindInvoicesByUserId(d *mongo.Database, userId string, limit int64) ([]bson.M, error) {
 	invoiceCollection := d.Collection("invoices")
 
 	var result []bson.M
@@ -22,6 +22,9 @@ func FindInvoicesByUserId(d *mongo.Database, userId string) ([]bson.M, error) {
 	}
 	findOptions := options.Find()
 	findOptions.SetSort(bson.M{"_id": -1})
+	if limit > 0 {
+		findOptions.SetLimit(limit)
+	}
 
 	filter := bson.M{"userId": id}
 
