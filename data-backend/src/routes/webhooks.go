@@ -111,7 +111,7 @@ func ReceiveWebhook(database *mongo.Database) func(ctx *gin.Context) {
 		company, err := db.FindCompanyByUserId(database, userId)
 
 		var wd models.WebhookData
-		err = ctx.BindJSON(&wd)
+		err = ctx.ShouldBindJSON(&wd)
 
 		if err != nil {
 			fmt.Println(err.Error())
