@@ -27,6 +27,13 @@ func main() {
 	app.GET("/data/invoices", routes.GetInvoices(database))
 	app.POST("/data/invoices", routes.PostInvoice(database))
 
+	app.GET("/data/services", routes.GetServices(database))
+	app.POST("/data/services", routes.PostService(database))
+
+	app.GET("/data/subscriptions", routes.GetSubscriptions(database))
+	app.GET("/data/subscriptions/last", routes.GetRecentSubscription(database))
+	app.POST("/data/subscriptions", routes.PostSubscription(database))
+
 	app.GET("/data/companies", routes.GetCompany(database))
 	app.POST("/data/companies", routes.PostCompany(database))
 
