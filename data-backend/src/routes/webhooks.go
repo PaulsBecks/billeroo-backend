@@ -3,6 +3,7 @@ package routes
 import (
 	"fmt"
 	"log"
+	"math"
 	"net/http"
 	"strconv"
 	"time"
@@ -147,7 +148,14 @@ func ReceiveWebhook(database *mongo.Database) func(ctx *gin.Context) {
 			invoice["invoiceNumber"] = invoiceNumber + wd.Number
 		}
 		invoice["payed"] = false
-		invoice["porto"] = wd.Shipping_total
+		portoGross, err := strconv.ParseFloat(wd.Shipping_total, 64)
+		if err != nil {
+			fmt.Println(err.Error())
+			ctx.Status(http.StatusBadRequest)
+			return
+		}
+
+		invoice["porto"] = math.Round(portoGross/105) / 100
 		invoice["totalPrice"] = wd.Total
 
 		customer, err := db.FindOrCreateCustomerByWPcustomerId(database, userId, strconv.Itoa(wd.Customer_id), wd.Billing, wd.Shipping)
@@ -167,6 +175,7 @@ func ReceiveWebhook(database *mongo.Database) func(ctx *gin.Context) {
 
 		invoice["customer"] = customer
 		invoice["articles"] = articles
+		invoice["services"] = bson.M{}
 
 		invoice, err = db.CreateInvoice(database, userId, invoice)
 
