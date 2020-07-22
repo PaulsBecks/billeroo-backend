@@ -179,6 +179,73 @@ app.get("/users/placeholder", async (req, res) => {
   return res.json({ user, token });
 });
 
+function parsePrice(price) {
+  return parseFloat((price + "").replace(",", "."));
+}
+
+app.get(
+  "/stats",
+  passport.authenticate("jwt", { session: false }),
+  async function (req, res) {
+    const client = new MongoClient(process.env.MONGO_URI);
+    await client.connect();
+    const { user } = req;
+    const invoices = await client
+      .db()
+      .collection("invoices")
+      .find({
+        $or: [{ deleted: { $exists: false } }, { deleted: false }],
+        userId: user._id,
+      })
+      .toArray();
+
+    const invoiceStats = [[], [], [], [], [], [], [], [], [], [], [], []];
+
+    for (let i in invoices) {
+      const invoice = invoices[i];
+      const invoiceDate = new Date(invoice.invoiceDate);
+      const { totalPrice } = invoice;
+      const month = invoiceDate.getMonth();
+
+      invoiceStats[parseInt(month)].push({
+        totalPrice: parsePrice(totalPrice),
+        totalPriceNet:
+          parsePrice(totalPrice) / (1 + parsePrice(invoice.customer.ust) / 100),
+      });
+    }
+
+    const articleStats = invoices.reduce((stats, i) => {
+      for (const aId in i.articles) {
+        const article = i.articles[aId];
+        if (!stats[article._id]) {
+          stats[article._id] = {
+            totalSold: 0,
+            invoices: [],
+            totalSend: 0,
+            totalTurnover: 0,
+            name: article.name,
+          };
+        }
+        const toBePayed = parseInt(article.toBePayed + "");
+        stats[article._id].totalSold += toBePayed;
+        stats[article._id].totalSend += parseInt(article.toBeSend + "");
+        stats[article._id].totalTurnover +=
+          toBePayed * parsePrice(article.price);
+        stats[article._id].invoices.push({
+          _id: i._id,
+          send: article.toBeSend,
+          payed: article.toBePayed,
+          invoiceNumber: i.invoiceNumber,
+          customerName: i.customer.name,
+          paymentDate: i.paymentDate,
+        });
+      }
+      return { ...stats };
+    }, {});
+
+    return res.json({ body: { invoiceStats, articleStats } });
+  }
+);
 // START SERVER
 const port = 8000;
 const server = app.listen(port, () =>
