@@ -223,6 +223,7 @@ app.get(
             invoices: [],
             totalSend: 0,
             totalTurnover: 0,
+            totalTurnoverNet: 0,
             name: article.name,
           };
         }
@@ -231,6 +232,11 @@ app.get(
         stats[article._id].totalSend += parseInt(article.toBeSend + "");
         stats[article._id].totalTurnover +=
           toBePayed * parsePrice(article.price);
+        stats[article._id].totalTurnoverNet +=
+          (toBePayed *
+            parsePrice(article.price) *
+            (100 + parsePrice(i.customer.ust))) /
+          100;
         stats[article._id].invoices.push({
           _id: i._id,
           send: article.toBeSend,
