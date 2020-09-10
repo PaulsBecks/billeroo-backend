@@ -12,7 +12,7 @@ import (
 	"billeroo.de/data-backend/src/mail"
 	"billeroo.de/data-backend/src/models"
 	"github.com/gin-gonic/gin"
-	"github.com/globalsign/mgo/bson"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -175,7 +175,7 @@ func ReceiveWebhook(database *mongo.Database) func(ctx *gin.Context) {
 
 		invoice["customer"] = customer
 		invoice["articles"] = articles
-		invoice["services"] = bson.M{}
+		invoice["services"] = bson.A{}
 
 		invoice, err = db.CreateInvoice(database, userId, invoice)
 

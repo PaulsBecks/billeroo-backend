@@ -6,7 +6,7 @@ import (
 
 	"billeroo.de/data-backend/src/db"
 	"github.com/gin-gonic/gin"
-	"github.com/globalsign/mgo/bson"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
