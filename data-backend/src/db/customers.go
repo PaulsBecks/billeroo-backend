@@ -99,9 +99,11 @@ func FindOrCreateCustomerByWPcustomerId(database *mongo.Database, uId string, wh
 		return customer, err
 	}
 
-	err = customersCollection.FindOne(context.Background(), bson.M{"userId": userId, "whCustomerId": whCustomerId}).Decode(&customer)
-	if err == nil {
-		return customer, err
+	if whCustomerId != "0" {
+		err = customersCollection.FindOne(context.Background(), bson.M{"userId": userId, "whCustomerId": whCustomerId}).Decode(&customer)
+		if err == nil {
+			return customer, err
+		}
 	}
 
 	customer["discount"] = 0
