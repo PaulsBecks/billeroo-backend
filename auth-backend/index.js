@@ -190,12 +190,15 @@ app.get(
     const client = new MongoClient(process.env.MONGO_URI);
     await client.connect();
     const { user } = req;
+    const now = new Date();
+    const { year = now.getFullYear() } = req.query
     const invoices = await client
       .db()
       .collection("invoices")
       .find({
         $or: [{ deleted: { $exists: false } }, { deleted: false }],
         userId: user._id,
+        invoiceDate: { '$regex': year }
       })
       .toArray();
 

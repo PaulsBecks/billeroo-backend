@@ -148,14 +148,14 @@ func ReceiveWebhook(database *mongo.Database) func(ctx *gin.Context) {
 			invoice["invoiceNumber"] = invoiceNumber + wd.Number
 		}
 		invoice["payed"] = false
-		portoGross, err := strconv.ParseFloat(wd.Shipping_total, 64)
+		portoGross, err := strconv.ParseFloat(wd.Total_shipping, 64)
 		if err != nil {
 			fmt.Println(err.Error())
 			ctx.Status(http.StatusBadRequest)
 			return
 		}
 
-		invoice["porto"] = math.Round(portoGross/105) / 100
+		invoice["porto"] = fmt.Sprintf("%.2f", (portoGross/107) * 100)
 		invoice["totalPrice"] = wd.Total
 
 		customer, err := db.FindOrCreateCustomerByWPcustomerId(database, userId, strconv.Itoa(wd.Customer_id), wd.Billing, wd.Shipping)
