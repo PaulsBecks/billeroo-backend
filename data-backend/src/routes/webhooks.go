@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"billeroo.de/data-backend/src/db"
-	//"billeroo.de/data-backend/src/mail"
+	"billeroo.de/data-backend/src/mail"
 	"billeroo.de/data-backend/src/models"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
@@ -100,7 +100,7 @@ func ReceiveWebhook(database *mongo.Database) func(ctx *gin.Context) {
 
 		userId := webhook["userId"].(primitive.ObjectID).Hex()
 
-		_, err = db.FindUserById(database, userId)
+		user, err := db.FindUserById(database, userId)
 
 		if err != nil {
 			fmt.Println(err.Error())
@@ -158,12 +158,12 @@ func ReceiveWebhook(database *mongo.Database) func(ctx *gin.Context) {
 		invoice["totalPrice"] = wd.Total
 		fmt.Println("Porto: $s", invoice["porto"])
 		
-		/*customer, err := db.FindOrCreateCustomerByWPcustomerId(database, userId, strconv.Itoa(wd.Customer_id), wd.Billing, wd.Shipping)
+		customer, err := db.FindOrCreateCustomerByWPcustomerId(database, userId, strconv.Itoa(wd.Customer_id), wd.Billing, wd.Shipping)
 		if err != nil {
 			fmt.Println(err.Error())
 			ctx.Status(http.StatusBadRequest)
 			return
-		}*/
+		}
 
 		articles, err := db.FindOrCreateArticlesByWPlineItems(database, userId, wd.Line_items)
 
@@ -173,11 +173,11 @@ func ReceiveWebhook(database *mongo.Database) func(ctx *gin.Context) {
 			return
 		}
 
-		//invoice["customer"] = customer
+		invoice["customer"] = customer
 		invoice["articles"] = articles
 		invoice["services"] = bson.A{}
 
-		/*invoice, err = db.CreateInvoice(database, userId, invoice)
+		invoice, err = db.CreateInvoice(database, userId, invoice)
 
 		if err != nil {
 			fmt.Println(err.Error())
@@ -190,6 +190,6 @@ func ReceiveWebhook(database *mongo.Database) func(ctx *gin.Context) {
 		mail.NewInvoiceEmail(user.Email, invoiceId)
 
 		ctx.JSON(http.StatusCreated, gin.H{"body": invoice})
-		return*/
+		return
 	}
 }

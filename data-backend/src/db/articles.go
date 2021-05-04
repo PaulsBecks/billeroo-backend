@@ -125,11 +125,11 @@ func FindOrCreateArticleByWHArticleId(database *mongo.Database, uId string, arti
 		result["amount"] = 100
 		result["whArticleId"] = strconv.Itoa(article.Product_id)
 		fmt.Println("Price %s", result["price"])
-		/*result, err = CreateArticle(database, uId, result)
+		result, err = CreateArticle(database, uId, result)
 		if err != nil {
 			fmt.Println(err.Error())
 			return nil, err
-			}*/
+			}
 		}
 		fmt.Println("Found product: ", result["name"])
 		
