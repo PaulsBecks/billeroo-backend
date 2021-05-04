@@ -3,7 +3,6 @@ package routes
 import (
 	"fmt"
 	"log"
-	"math"
 	"net/http"
 	"strconv"
 	"time"
