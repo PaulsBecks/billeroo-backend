@@ -91,8 +91,8 @@ func ReceiveWebhook(database *mongo.Database) func(ctx *gin.Context) {
 		webhookId := ctx.Param("webhookId")
 
 		webhook, err := db.FindWebhookById(database, webhookId)
-
 		if err != nil {
+			fmt.Println("Unable to find webhook id %s", webhookId)
 			fmt.Println(err.Error())
 			ctx.Status(http.StatusNotFound)
 			return
@@ -156,7 +156,8 @@ func ReceiveWebhook(database *mongo.Database) func(ctx *gin.Context) {
 
 		invoice["porto"] = fmt.Sprintf("%.2f", (portoGross/107) * 100)
 		invoice["totalPrice"] = wd.Total
-
+		fmt.Println("Porto: $s", invoice["porto"])
+		
 		customer, err := db.FindOrCreateCustomerByWPcustomerId(database, userId, strconv.Itoa(wd.Customer_id), wd.Billing, wd.Shipping)
 		if err != nil {
 			fmt.Println(err.Error())

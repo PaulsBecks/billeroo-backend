@@ -25,7 +25,8 @@ type WebhookLocationData struct {
 type WebhookLineItem struct {
 	Id         int     `json:"id"`
 	Name       string  `json:"name"`
-	Price      float64 `json:"price"`
+	Price      string `json:"total"`
+	Tax        string `json:"total_tax"`
 	Product_id int     `json:"product_id"`
 	Quantity   int     `json:"quantity"`
 }

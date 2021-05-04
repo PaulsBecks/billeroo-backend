@@ -109,15 +109,22 @@ func FindOrCreateArticleByWHArticleId(database *mongo.Database, uId string, arti
 	}
 
 	err = articlesCollection.FindOne(context.Background(), bson.M{"userId": userId, "whArticleId": strconv.Itoa(article.Product_id)}).Decode(&result)
+	
 	if err != nil {
+		fmt.Println("Unable to find article for userId %s and whArticleId %s", uId, article.Product_id)
 		result = bson.M{}
 
 		result["name"] = article.Name
 		result["isbn"] = ""
-		result["price"] = article.Price
+		price, err := strconv.ParseFloat(article.Price, 64) 
+		tax, err := strconv.ParseFloat(article.Tax, 64)
+		if err != nil {
+			return nil, err;
+		}
+		result["price"] = fmt.Sprintf("%.2f", price + tax)
 		result["amount"] = 100
 		result["whArticleId"] = strconv.Itoa(article.Product_id)
-
+		fmt.Println("Price %s", result["price"])
 		result, err = CreateArticle(database, uId, result)
 		if err != nil {
 			fmt.Println(err.Error())
