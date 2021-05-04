@@ -99,6 +99,7 @@ func CreateArticle(d *mongo.Database, uId string, article bson.M) (bson.M, error
 }
 
 func FindOrCreateArticleByWHArticleId(database *mongo.Database, uId string, article models.WebhookLineItem) (bson.M, error) {
+	fmt.Println("Checking article: ", article.Product_id)
 	articlesCollection := database.Collection("articles")
 
 	result := bson.M{}
@@ -109,11 +110,10 @@ func FindOrCreateArticleByWHArticleId(database *mongo.Database, uId string, arti
 	}
 
 	err = articlesCollection.FindOne(context.Background(), bson.M{"userId": userId, "whArticleId": strconv.Itoa(article.Product_id)}).Decode(&result)
-	
 	if err != nil {
 		fmt.Println("Unable to find article for userId %s and whArticleId %s", uId, article.Product_id)
 		result = bson.M{}
-
+		
 		result["name"] = article.Name
 		result["isbn"] = ""
 		price, err := strconv.ParseFloat(article.Price, 64) 
@@ -125,19 +125,20 @@ func FindOrCreateArticleByWHArticleId(database *mongo.Database, uId string, arti
 		result["amount"] = 100
 		result["whArticleId"] = strconv.Itoa(article.Product_id)
 		fmt.Println("Price %s", result["price"])
-		result, err = CreateArticle(database, uId, result)
+		/*result, err = CreateArticle(database, uId, result)
 		if err != nil {
 			fmt.Println(err.Error())
 			return nil, err
+			}*/
 		}
+		fmt.Println("Found product: ", result["name"])
+		
+		result["toBeSend"] = article.Quantity
+		result["toBePayed"] = article.Quantity
+		
+		return result, nil
 	}
-
-	result["toBeSend"] = article.Quantity
-	result["toBePayed"] = article.Quantity
-
-	return result, nil
-}
-
+	
 func FindOrCreateArticlesByWPlineItems(database *mongo.Database, userId string, articles []models.WebhookLineItem) ([]bson.M, error) {
 	results := []bson.M{}
 
