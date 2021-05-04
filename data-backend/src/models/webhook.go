@@ -3,7 +3,7 @@ package models
 type WebhookData struct {
 	Number         string              `json:"number"`
 	Total          string              `json:"total"`
-	Total_shipping string              `json:"total_shipping"`
+	Total_shipping string              `json:"shipping_total"`
 	Billing        WebhookLocationData `json:"billing"`
 	Line_items     []WebhookLineItem   `json:"line_items"`
 	Shipping       WebhookLocationData `json:"shipping"`

@@ -118,6 +118,7 @@ func ReceiveWebhook(database *mongo.Database) func(ctx *gin.Context) {
 			ctx.Status(http.StatusOK)
 			return
 		}
+		fmt.Println(wd)
 
 		dateTime := time.Now()
 		invoice := bson.M{}
@@ -147,14 +148,14 @@ func ReceiveWebhook(database *mongo.Database) func(ctx *gin.Context) {
 			invoice["invoiceNumber"] = invoiceNumber + wd.Number
 		}
 		invoice["payed"] = false
-		portoGross, err := strconv.ParseFloat(wd.Total_shipping, 64)
+		porto, err := strconv.ParseFloat(wd.Total_shipping, 64)
 		if err != nil {
 			fmt.Println(err.Error())
 			ctx.Status(http.StatusBadRequest)
 			return
 		}
 
-		invoice["porto"] = fmt.Sprintf("%.2f", (portoGross/107) * 100)
+		invoice["porto"] = fmt.Sprintf("%.2f", porto)
 		invoice["totalPrice"] = wd.Total
 		fmt.Println("Porto: $s", invoice["porto"])
 		
