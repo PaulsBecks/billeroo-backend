@@ -191,14 +191,14 @@ app.get(
     await client.connect();
     const { user } = req;
     const now = new Date();
-    const { year = now.getFullYear() } = req.query
+    const { year = now.getFullYear().toString() } = req.query;
     const invoices = await client
       .db()
       .collection("invoices")
       .find({
         $or: [{ deleted: { $exists: false } }, { deleted: false }],
         userId: user._id,
-        invoiceDate: { '$regex': year }
+        invoiceDate: { $regex: year },
       })
       .toArray();
 
